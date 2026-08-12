@@ -1,7 +1,7 @@
 prompts = [
    
 ]
-
+#continous
 @torch.inference_mode()
 def generate_batch(prompts, max_new_tokens=200):
     tok.padding_side = "left"
