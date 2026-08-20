@@ -39,14 +39,18 @@ def benchmark_batch_size(runner, batch_size, max_new_tokens=128):
     }
 
 
-def sweep(runner, batch_sizes=(1, 2, 4, 8, 16, 32), max_new_tokens=128):
+def sweep(runner, batch_sizes=(1, 2, 4, 8, 16, 32, 64, 128, 256), max_new_tokens=128):
     rows = []
     for b in batch_sizes:
-        row = benchmark_batch_size(runner, b, max_new_tokens)
-        print(row)
-        rows.append(row)
+        try:
+            row = benchmark_batch_size(runner, b, max_new_tokens)
+            print(row)
+            rows.append(row)
+        except torch.cuda.OutOfMemoryError:
+            print(f"batch_size={b}: memory ceiling hit")
+            torch.cuda.empty_cache()     
+            break                         
     return rows
-
 
 if __name__ == "__main__":
     runner = ModelRunner()
