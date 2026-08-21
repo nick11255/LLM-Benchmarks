@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 class ModelRunner:
     """loads model and tokeniser"""
 
-    def __init__(self, name="Qwen/Qwen2.5-1.5B", device="cuda"):
+    def __init__(self, name="Qwen/Qwen2.5-1.5B-Instruct", device="cuda"):
         self.device = device
         self.tok = AutoTokenizer.from_pretrained(name)
 
