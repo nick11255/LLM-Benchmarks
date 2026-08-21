@@ -19,6 +19,11 @@ class ModelRunner:
         ).to(device)
         self.model.eval()
 
+        def format_prompt(self, text):
+            messages = [{"role": "user", "content": text}]
+            return self.tok.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+    )
     @torch.inference_mode()
     def generate_single(self, prompt, max_new_tokens=200):
         """manual decode loop with batch size of 1"""

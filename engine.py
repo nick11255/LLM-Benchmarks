@@ -22,7 +22,15 @@ def static_batch(prompts, model, tok, max_new_tokens=200):
     return [tok.decode(seq, skip_special_tokens=True) for seq in generated]
 @torch.inference_mode()
 def dynamic_batch(prompts, model, tok, max_new_tokens=200):
-    eos = tok.eos_token_id
+    eos_ids = {tok.eos_token_id}
+    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    if im_end is not None:
+        eos_ids.add(im_end)
+    prompts = [                               
+        tok.apply_chat_template([{"role": "user", "content": p}],
+                                tokenize=False, add_generation_prompt=True)
+        for p in prompts
+    ]
     enc = tok(prompts, return_tensors="pt", padding=True).to(model.device)
     input_ids, attn = enc.input_ids, enc.attention_mask
     past = None
@@ -41,7 +49,7 @@ def dynamic_batch(prompts, model, tok, max_new_tokens=200):
         keep = []
         for row, orig in enumerate(active):
             outputs[orig].append(toks[row])
-            if toks[row] != eos:
+            if toks[row] not in eos_ids:
                 keep.append(row)
 
         attn = torch.cat([attn, torch.ones_like(next_tok)], dim=1)
